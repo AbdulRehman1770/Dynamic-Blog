@@ -3,19 +3,19 @@ import CommentSection from '@/app/my-blog/components/CommentSection';
 
 interface BlogPostPageProps {
   params: {
-    id: string; 
+    id: any;
   };
 }
 
 export const generateStaticParams = async () => {
   const paths = blogPosts.map((post) => ({
-    id: post.id.toString(),
+    params: { id: post.id.toString() },
   }));
 
   return paths;
 };
 
-const BlogPostPage = ({ params }: BlogPostPageProps) => {
+const BlogPostPage = async ({ params }: any) => {
   const postId = parseInt(params.id, 10);
   const post = blogPosts.find((p) => p.id === postId);
 
