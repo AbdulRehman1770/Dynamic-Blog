@@ -1,14 +1,33 @@
+import { GetStaticPaths, GetStaticProps, InferGetStaticPropsType } from 'next';
+import { ParsedUrlQuery } from 'querystring';
 import { blogPosts } from '@/app/my-blog/data/blogPosts';
 import CommentSection from '@/app/my-blog/components/CommentSection';
 
-interface BlogPostPageProps {
-  params: {
-    id: string; 
-  };
+interface BlogPostPageProps extends ParsedUrlQuery {
+  id: string;
 }
 
-const BlogPostPage = ({ params }: BlogPostPageProps) => {
-  const postId = parseInt(params.id, 10);
+export const getStaticPaths: GetStaticPaths = async () => {
+  const paths = blogPosts.map((post) => ({
+    params: { id: post.id.toString() },
+  }));
+
+  return { paths, fallback: false };
+};
+
+export const getStaticProps: GetStaticProps<BlogPostPageProps> = async ({ params }) => {
+  const postId = parseInt(params!.id as string, 10);
+  const post = blogPosts.find((p) => p.id === postId);
+
+  if (!post) {
+    return { notFound: true };
+  }
+
+  return { props: { id: params!.id as string } };
+};
+
+const BlogPostPage = ({ id }: InferGetStaticPropsType<typeof getStaticProps>) => {
+  const postId = parseInt(id, 10);
   const post = blogPosts.find((p) => p.id === postId);
 
   if (!post) {
@@ -33,14 +52,6 @@ const BlogPostPage = ({ params }: BlogPostPageProps) => {
       </div>
     </div>
   );
-};
-
-export const generateStaticParams = async () => {
-  const paths = blogPosts.map((post) => ({
-    id: post.id.toString(),
-  }));
-
-  return paths;
 };
 
 export default BlogPostPage;
